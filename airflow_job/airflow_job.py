@@ -23,10 +23,10 @@ with DAG(
 ) as dag:
 
     # Fetch environment variables
-    env = Variable.get("env")
-    gcs_bucket = Variable.get("gcs_bucket")
-    bq_project = Variable.get("bq_project")
-    bq_dataset = Variable.get("bq_dataset")
+    env = Variable.get("env", default_var="dev")
+    gcs_bucket = Variable.get("gcs_bucket", default_var="airflow_project-1")
+    bq_project = Variable.get("bq_project", default_var="pyspark-practice-445003")
+    bq_dataset = Variable.get("bq_dataset", default_var=f"flight_data_{env}")
     tables = Variable.get("tables", deserialize_json=True)
 
     # Extract table names from the 'tables' variable
@@ -41,7 +41,7 @@ with DAG(
     file_sensor = GCSObjectExistenceSensor(
         task_id="check_file_arrival",
         bucket=gcs_bucket,
-        object=f"/source-{env}/flight_booking.csv",  # Full file path in GCS
+        object=f"source-{env}/flight_booking.csv",  # Full file path in GCS
         google_cloud_conn_id="google_cloud_default",  # GCP connection
         timeout=300,  # Timeout in seconds
         poke_interval=30,  # Time between checks
